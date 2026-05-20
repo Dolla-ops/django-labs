@@ -1,0 +1,33 @@
+{% extends 'cinema/base.html' %}
+
+{% block title %}Увійти — CinemaUA{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <div class="auth-box">
+            <h1>Увійти</h1>
+            <form method="post">
+                {% csrf_token %}
+                {% for field in form %}
+                    <div class="form-group">
+                        <label>{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.errors %}
+                            <span class="form-error">{{ field.errors.0 }}</span>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+                {% if form.non_field_errors %}
+                    <p class="form-error">{{ form.non_field_errors.0 }}</p>
+                {% endif %}
+                <button type="submit" class="btn btn-primary btn-full">Увійти</button>
+            </form>
+            <div class="auth-links">
+                <a href="{% url 'register' %}">Ще не маєте акаунту? Зареєструватись</a>
+                <a href="{% url 'password_reset_request' %}">Забули пароль?</a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

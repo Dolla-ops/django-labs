@@ -1,0 +1,72 @@
+{% extends 'cinema/base.html' %}
+
+{% block title %}Особистий кабінет — CinemaUA{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <div class="page-header">
+            <a href="{% url 'home' %}" class="back-link">← Головна</a>
+            <h1>👤 {{ user.first_name|default:user.username }}</h1>
+            <p class="page-desc">
+                {{ user.email }}
+                {% if user.is_staff %}<span class="badge-admin">Адміністратор</span>{% endif %}
+            </p>
+        </div>
+
+        <div class="profile-stats">
+            <div class="stat-card">
+                <span class="stat-value">{{ orders.count }}</span>
+                <span class="stat-label">{% if user.is_staff %}Всіх замовлень{% else %}Замовлень{% endif %}</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-value">{{ total_spent }} грн</span>
+                <span class="stat-label">Сума</span>
+            </div>
+        </div>
+
+        <h2>{% if user.is_staff %}Всі замовлення{% else %}Мої замовлення{% endif %}</h2>
+
+        {% if orders %}
+            <div class="orders-table-wrap">
+                <table class="cart-table">
+                    <thead>
+                        <tr>
+                            {% if user.is_staff %}<th>Клієнт</th>{% endif %}
+                            <th>Фільм</th>
+                            <th>Сеанс</th>
+                            <th>К-сть</th>
+                            <th>Сума</th>
+                            <th>Дата</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in orders %}
+                            <tr>
+                                {% if user.is_staff %}
+                                    <td>{{ order.user.username }}</td>
+                                {% endif %}
+                                <td>{{ order.session.movie.title }}</td>
+                                <td>{{ order.session.starts_at|date:"d.m.Y H:i" }}</td>
+                                <td>{{ order.quantity }}</td>
+                                <td>{{ order.total_price }} грн</td>
+                                <td>{{ order.created_at|date:"d.m.Y" }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <p>Замовлень ще немає.</p>
+                <a href="{% url 'home' %}" class="btn btn-primary">Переглянути афішу</a>
+            </div>
+        {% endif %}
+
+        <div class="profile-actions">
+            <a href="{% url 'password_reset_request' %}" class="btn btn-outline">🔑 Змінити пароль</a>
+            <a href="{% url 'logout' %}" class="btn btn-ghost">Вийти</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

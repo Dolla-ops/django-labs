@@ -1,0 +1,71 @@
+{% extends 'cinema/base.html' %}
+
+{% block title %}Кошик — CinemaUA{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <div class="page-header">
+            <a href="{% url 'home' %}" class="back-link">← Головна</a>
+            <h1>🎟 Кошик</h1>
+        </div>
+
+        {% if tickets %}
+            <div class="cart-table-wrap">
+                <table class="cart-table">
+                    <thead>
+                        <tr>
+                            <th>Фільм</th>
+                            <th>Сеанс</th>
+                            <th>Зала</th>
+                            <th>К-сть</th>
+                            <th>Сума</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ticket in tickets %}
+                            <tr>
+                                <td>
+                                    <a href="{% url 'movie_detail' ticket.session.movie.slug %}">
+                                        {{ ticket.session.movie.title }}
+                                    </a>
+                                </td>
+                                <td>{{ ticket.session.starts_at|date:"d.m.Y H:i" }}</td>
+                                <td>{{ ticket.session.hall }}</td>
+                                <td>{{ ticket.quantity }}</td>
+                                <td><strong>{{ ticket.total_price }} грн</strong></td>
+                                <td>
+                                    <form method="post" action="{% url 'remove_from_cart' ticket.id %}">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-danger btn-sm">Видалити</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="cart-total">
+                <span>Разом:</span>
+                <strong>{{ total }} грн</strong>
+            </div>
+
+            <div class="cart-actions">
+                <a href="{% url 'home' %}" class="btn btn-outline">← Продовжити</a>
+                <form method="post" action="{% url 'checkout' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary btn-lg">✅ Оформити замовлення</button>
+                </form>
+            </div>
+
+        {% else %}
+            <div class="empty-state">
+                <p>Ваш кошик порожній 🙁</p>
+                <a href="{% url 'home' %}" class="btn btn-primary">Переглянути афішу</a>
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

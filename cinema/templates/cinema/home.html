@@ -1,0 +1,87 @@
+{% extends 'cinema/base.html' %}
+
+{% block title %}CinemaUA — Головна{% endblock %}
+
+{% block content %}
+
+<!-- ── HERO ─────────────────────────────────────────────────────────────── -->
+<section class="hero">
+    <div class="hero-content">
+        <h1>Кіно, яке <span class="accent">захоплює</span></h1>
+        <p>Найкращі фільми, зручне бронювання квитків, незабутні враження</p>
+        <a href="#movies" class="btn btn-primary btn-lg">Переглянути афішу</a>
+    </div>
+</section>
+
+<!-- ── ЖАНРИ (посилання на всі сторінки) ─────────────────────────────── -->
+<section class="section">
+    <div class="container">
+        <h2 class="section-title">Жанри</h2>
+        <div class="genre-grid">
+            {% for genre in genres %}
+                <a href="{% url 'genre_detail' genre.slug %}" class="genre-card">
+                    <span class="genre-name">{{ genre.name }}</span>
+                    <span class="genre-count">{{ genre.movies.count }} фільмів</span>
+                </a>
+            {% empty %}
+                <p>Жанри відсутні. Додайте через адмін-панель.</p>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- ── ФІЛЬМИ З БД ──────────────────────────────────────────────────── -->
+<section class="section section-dark" id="movies">
+    <div class="container">
+        <h2 class="section-title">Зараз в прокаті</h2>
+        <div class="movies-grid">
+            {% for movie in movies %}
+                <div class="movie-card">
+                    {% if movie.poster %}
+                        <img src="{{ movie.poster.url }}" alt="{{ movie.title }}" class="movie-poster">
+                    {% else %}
+                        <div class="movie-poster-placeholder">🎬</div>
+                    {% endif %}
+                    <div class="movie-info">
+                        <span class="movie-genre">{{ movie.genre.name }}</span>
+                        <h3 class="movie-title">{{ movie.title }}</h3>
+                        <p class="movie-meta">{{ movie.year }} · {{ movie.duration }} хв</p>
+                        {% with avg=movie.avg_rating %}
+                            {% if avg %}
+                                <p class="movie-rating">⭐ {{ avg }}/10</p>
+                            {% endif %}
+                        {% endwith %}
+                        <p class="movie-price">від {{ movie.price }} грн</p>
+                        <a href="{% url 'movie_detail' movie.slug %}" class="btn btn-primary btn-sm">Деталі та квитки</a>
+                    </div>
+                </div>
+            {% empty %}
+                <p>Фільми відсутні. Додайте через адмін-панель.</p>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- ── ПІДПИСКА НА РОЗСИЛКУ ─────────────────────────────────────────── -->
+<section class="section newsletter-section">
+    <div class="container">
+        <div class="newsletter-box">
+            <h2>Не пропускайте прем'єри!</h2>
+            <p>Підпишіться на розсилку і отримуйте анонси нових фільмів першими</p>
+            <form method="post" class="newsletter-form">
+                {% csrf_token %}
+                <input type="hidden" name="newsletter_submit" value="1">
+                <div class="newsletter-fields">
+                    {{ newsletter_form.name }}
+                    {{ newsletter_form.email }}
+                    <button type="submit" class="btn btn-primary">Підписатись</button>
+                </div>
+                {% if newsletter_form.errors %}
+                    <p class="form-error">{{ newsletter_form.errors }}</p>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

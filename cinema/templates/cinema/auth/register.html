@@ -1,0 +1,32 @@
+{% extends 'cinema/base.html' %}
+
+{% block title %}Реєстрація — CinemaUA{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <div class="auth-box">
+            <h1>Реєстрація</h1>
+            <form method="post">
+                {% csrf_token %}
+                {% for field in form %}
+                    <div class="form-group">
+                        <label>{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.errors %}
+                            <span class="form-error">{{ field.errors.0 }}</span>
+                        {% endif %}
+                        {% if field.help_text %}
+                            <small class="form-help">{{ field.help_text }}</small>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+                <button type="submit" class="btn btn-primary btn-full">Зареєструватись</button>
+            </form>
+            <div class="auth-links">
+                <a href="{% url 'login' %}">Вже маєте акаунт? Увійти</a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

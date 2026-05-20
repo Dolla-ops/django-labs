@@ -1,0 +1,109 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}CinemaUA{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'cinema/style.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<!-- ═══════════════════ HEADER / МЕНЮ ═══════════════════ -->
+<header class="site-header">
+    <div class="container header-inner">
+        <a href="{% url 'home' %}" class="logo">🎬 CinemaUA</a>
+
+        <nav class="main-nav">
+            <a href="{% url 'home' %}">Головна</a>
+
+            <!-- Жанри з бази даних (context_processor) -->
+            {% for genre in genres %}
+                <a href="{% url 'genre_detail' genre.slug %}">{{ genre.name }}</a>
+            {% endfor %}
+        </nav>
+
+        <div class="header-actions">
+            {% if user.is_authenticated %}
+                <a href="{% url 'cart' %}" class="btn btn-outline">
+                    🎟 Кошик
+                    {% if cart_count > 0 %}
+                        <span class="badge">{{ cart_count }}</span>
+                    {% endif %}
+                </a>
+                <a href="{% url 'profile' %}" class="btn btn-ghost">{{ user.username }}</a>
+                <a href="{% url 'logout' %}" class="btn btn-ghost">Вийти</a>
+            {% else %}
+                <a href="{% url 'login' %}" class="btn btn-primary">Увійти</a>
+                <a href="{% url 'register' %}" class="btn btn-outline">Реєстрація</a>
+            {% endif %}
+        </div>
+    </div>
+</header>
+
+<!-- ═══════════════════ ПОВІДОМЛЕННЯ ═══════════════════ -->
+{% if messages %}
+    <div class="messages-wrapper">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+<!-- ═══════════════════ ОСНОВНИЙ КОНТЕНТ ═══════════════════ -->
+<main class="main-content">
+    {% block content %}{% endblock %}
+</main>
+
+<!-- ═══════════════════ FOOTER ═══════════════════ -->
+<footer class="site-footer">
+    <div class="container footer-inner">
+        <div class="footer-brand">
+            <span class="logo">🎬 CinemaUA</span>
+            <p>Найкращий кінотеатр України.<br>Дивись фільми з нами!</p>
+        </div>
+
+        <div class="footer-links">
+            <h4>Жанри</h4>
+            <ul>
+                {% for genre in genres %}
+                    <li><a href="{% url 'genre_detail' genre.slug %}">{{ genre.name }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div class="footer-links">
+            <h4>Акаунт</h4>
+            <ul>
+                {% if user.is_authenticated %}
+                    <li><a href="{% url 'profile' %}">Особистий кабінет</a></li>
+                    <li><a href="{% url 'cart' %}">Кошик</a></li>
+                    <li><a href="{% url 'logout' %}">Вийти</a></li>
+                {% else %}
+                    <li><a href="{% url 'login' %}">Увійти</a></li>
+                    <li><a href="{% url 'register' %}">Реєстрація</a></li>
+                {% endif %}
+            </ul>
+        </div>
+
+        <div class="footer-links">
+            <h4>Контакти</h4>
+            <ul>
+                <li>📍 вул. Хрещатик, 1, Київ</li>
+                <li>📞 +38 (044) 000-00-00</li>
+                <li>✉️ info@cinemaUA.com</li>
+            </ul>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <p>© 2024 CinemaUA. Всі права захищені.</p>
+    </div>
+</footer>
+
+{% block extra_js %}{% endblock %}
+</body>
+</html>

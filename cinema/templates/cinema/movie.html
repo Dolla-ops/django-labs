@@ -1,0 +1,128 @@
+{% extends 'cinema/base.html' %}
+
+{% block title %}{{ movie.title }} — CinemaUA{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <a href="{% url 'genre_detail' movie.genre.slug %}" class="back-link">← {{ movie.genre.name }}</a>
+        <a href="{% url 'home' %}" class="back-link" style="margin-left:1rem">🏠 Головна</a>
+
+        <!-- ── Деталі фільму ─── -->
+        <div class="movie-detail">
+            <div class="movie-detail-poster">
+                {% if movie.poster %}
+                    <img src="{{ movie.poster.url }}" alt="{{ movie.title }}">
+                {% else %}
+                    <div class="movie-poster-placeholder large">🎬</div>
+                {% endif %}
+            </div>
+            <div class="movie-detail-info">
+                <span class="movie-genre-badge">{{ movie.genre.name }}</span>
+                <h1>{{ movie.title }}</h1>
+                <div class="movie-meta-row">
+                    <span>📅 {{ movie.year }}</span>
+                    <span>⏱ {{ movie.duration }} хв</span>
+                    <span>🎬 {{ movie.director }}</span>
+                </div>
+                {% if avg %}
+                    <div class="avg-rating">
+                        <span class="rating-stars">⭐</span>
+                        <span class="rating-score">{{ avg }}/10</span>
+                        <span class="rating-count">({{ movie.ratings.count }} оцінок)</span>
+                    </div>
+                {% else %}
+                    <p class="no-rating">Ще немає оцінок</p>
+                {% endif %}
+                <p class="movie-description">{{ movie.description }}</p>
+                <p class="movie-price-big">Квиток від <strong>{{ movie.price }} грн</strong></p>
+            </div>
+        </div>
+
+        <!-- ── Сеанси / Купити квиток ─── -->
+        <div class="sessions-section">
+            <h2>Найближчі сеанси</h2>
+            {% if sessions %}
+                <div class="sessions-list">
+                    {% for session in sessions %}
+                        <div class="session-card">
+                            <div class="session-info">
+                                <span class="session-time">{{ session.starts_at|date:"d.m.Y H:i" }}</span>
+                                <span class="session-hall">Зала: {{ session.hall }}</span>
+                                <span class="session-seats">Місць: {{ session.seats_available }}</span>
+                            </div>
+                            <div class="session-price">{{ movie.price }} грн / квиток</div>
+                            {% if user.is_authenticated %}
+                                <form method="post" action="{% url 'add_to_cart' session.id %}" class="session-form">
+                                    {% csrf_token %}
+                                    <input type="number" name="quantity" value="1" min="1" max="{{ session.seats_available }}" class="qty-input">
+                                    <button type="submit" class="btn btn-primary">🎟 Купити</button>
+                                </form>
+                            {% else %}
+                                <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-outline">Увійдіть щоб купити</a>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="empty-msg">Найближчих сеансів немає. Слідкуйте за оновленнями!</p>
+            {% endif %}
+        </div>
+
+        <!-- ── Оцінки ─── -->
+        <div class="ratings-section">
+            <h2>Оцінки глядачів</h2>
+
+            <!-- Форма оцінки (Лаба 7) -->
+            {% if user.is_authenticated %}
+                {% if user_rating %}
+                    <div class="user-rating-info">
+                        ✅ Ваша оцінка: <strong>{{ user_rating.score }}/10</strong>
+                        {% if user_rating.comment %}<p>{{ user_rating.comment }}</p>{% endif %}
+                    </div>
+                {% elif rating_form %}
+                    <div class="rating-form-box">
+                        <h3>Оцінити фільм</h3>
+                        <form method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="rating_submit" value="1">
+                            <div class="form-group">
+                                <label>{{ rating_form.score.label }}</label>
+                                {{ rating_form.score }}
+                            </div>
+                            <div class="form-group">
+                                <label>{{ rating_form.comment.label }}</label>
+                                {{ rating_form.comment }}
+                            </div>
+                            <button type="submit" class="btn btn-primary">Надіслати оцінку</button>
+                        </form>
+                    </div>
+                {% endif %}
+            {% else %}
+                <p><a href="{% url 'login' %}">Увійдіть</a>, щоб залишити оцінку.</p>
+            {% endif %}
+
+            <!-- Список оцінок -->
+            {% if ratings %}
+                <div class="ratings-list">
+                    {% for r in ratings %}
+                        <div class="rating-item">
+                            <div class="rating-header">
+                                <strong>{{ r.user.username }}</strong>
+                                <span class="rating-badge">{{ r.score }}/10 ⭐</span>
+                                <span class="rating-date">{{ r.created_at|date:"d.m.Y" }}</span>
+                            </div>
+                            {% if r.comment %}
+                                <p class="rating-comment">{{ r.comment }}</p>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="empty-msg">Поки немає оцінок. Будьте першим!</p>
+            {% endif %}
+        </div>
+
+    </div>
+</section>
+{% endblock %}
